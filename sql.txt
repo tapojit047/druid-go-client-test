@@ -1,0 +1,10 @@
+curl "http://admin:MMt_nIXvA4XR3)OA@localhost:8888/druid/v2/sql" \
+--header 'Content-Type: application/json' \
+--data '{
+    "query": "SELECT * FROM dummy-data"
+}'
+
+"context" : {"sqlQueryId" : "request01"},
+"header" : true,
+"typesHeader" : true,
+"sqlTypesHeader" : true
