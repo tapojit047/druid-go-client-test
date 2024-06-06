@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/grafadruid/go-druid"
 	"github.com/hashicorp/go-retryablehttp"
+	util "github.com/tapojit047/druid-go-client-test/oprtr-test"
 	"log"
 	"os"
 	"time"
@@ -13,7 +14,7 @@ import (
 func main() {
 
 	var druidOpts []druid.ClientOption
-	druidOpts = append(druidOpts, druid.WithBasicAuth("admin", "5bFnC.M2PX*UER(7"))
+	druidOpts = append(druidOpts, druid.WithBasicAuth("admin", "UNfjuBihl4*4Z)Cf"))
 	d, err := druid.NewClient("http://localhost:8888", druidOpts...)
 	if err != nil {
 		log.Fatal(err)
@@ -24,6 +25,13 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	taskID, err := util.SubmitIngestionTask(d, "0")
+	if err != nil {
+		fmt.Sprintf("Failed to submit ingestion task: %v", err)
+		return
+	}
+	fmt.Println(taskID)
 
 	//path := "druid/coordinator/v1/datasources/dummy-data/loadstatus?forceMetadataRefresh==true"
 	//response := SubmitRequest(d, "GET", path, nil)
@@ -43,6 +51,28 @@ func main() {
 	//fmt.Println(CheckDataSourceExist(d))
 	DruidHealthCheck(d)
 	DruidCreateDataSource(d)
+}
+
+func UpdateCoordinatorDynamicConfig(d *druid.Client) {
+	method := "POST"
+	path := "druid/coordinator/v1/config"
+
+	data := map[string]interface{}{
+		"millisToWaitBeforeDeleting": 500,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Printf("could not marshal json: %s\n", err)
+	}
+	rawMessage := json.RawMessage(jsonData)
+	response := SubmitRequest(d, method, path, rawMessage)
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			fmt.Println("Error closing response body:", err)
+		}
+	}()
 }
 
 func CheckDataSourceExist(d *druid.Client) bool {
@@ -117,16 +147,16 @@ func DruidHealthCheck(d *druid.Client) {
 }
 
 func DruidCreateDataSource(d *druid.Client) {
-	dataSourceExist := false
+	//dataSourceExist := false
 	oldData := "0"
 	if CheckDataSourceExist(d) {
 		//fmt.Println("YES")
 		oldData = RunSelectQuery(d)
-		dataSourceExist = true
+		//dataSourceExist = true
 	}
 	//fmt.Println(oldData)
 
-	startTime := time.Now()
+	//startTime := time.Now()
 	//// Create datasource and insert data
 	method := "POST"
 	path := "druid/indexer/v1/task"
@@ -173,48 +203,47 @@ func DruidCreateDataSource(d *druid.Client) {
 		}
 		time.Sleep(2 * time.Second)
 	}
-
 	//// Check if segment is loaded
-	for true {
-		// Check if segment loaded
-		//path = "druid/coordinator/v1/datasources/dummy-data/loadstatus?forceMetadataRefresh==true"
-		//response = SubmitRequest(d, "GET", path, nil)
-		//status, err := GetValueFromClusterResponse(response, "dummy-data")
-		//fmt.Println(status)
-		//if err != nil {
-		//	fmt.Println(err)
-		//	return
-		//}
-		//
-		//fmt.Println(status)
-		//if status == "100.0" {
-		//	fmt.Sprintf("datasource load successful\n")
-		//} else {
-		//	fmt.Println("Data load unsuccessful\n")
-		//	time.Sleep(2 * time.Second)
-		//	continue
-		//}
-		//fmt.Println(dataSourceExist)
-		if !dataSourceExist {
-			time.Sleep(5 * time.Second)
-		}
-
-		name := RunSelectQuery(d)
-		//fmt.Println(oldData, " ", name)
-		if name != oldData {
-			break
-		}
-		//fmt.Sprintf("lodaing data and datasource...\n")
-
-		if err != nil {
-			fmt.Sprintf("Unable to parse response and get status of datasource\n")
-			return
-		}
-		time.Sleep(3 * time.Second)
-	}
-	endTime := time.Now()
-	duration := endTime.Sub(startTime)
-	fmt.Printf("Data Insertion succeeded in %v seconds", duration)
+	//for true {
+	//	// Check if segment loaded
+	//	//path = "druid/coordinator/v1/datasources/dummy-data/loadstatus?forceMetadataRefresh==true"
+	//	//response = SubmitRequest(d, "GET", path, nil)
+	//	//status, err := GetValueFromClusterResponse(response, "dummy-data")
+	//	//fmt.Println(status)
+	//	//if err != nil {
+	//	//	fmt.Println(err)
+	//	//	return
+	//	//}
+	//	//
+	//	//fmt.Println(status)
+	//	//if status == "100.0" {
+	//	//	fmt.Sprintf("datasource load successful\n")
+	//	//} else {
+	//	//	fmt.Println("Data load unsuccessful\n")
+	//	//	time.Sleep(2 * time.Second)
+	//	//	continue
+	//	//}
+	//	//fmt.Println(dataSourceExist)
+	//	if !dataSourceExist {
+	//		time.Sleep(5 * time.Second)
+	//	}
+	//
+	//	name := RunSelectQuery(d)
+	//	//fmt.Println(oldData, " ", name)
+	//	if name != oldData {
+	//		break
+	//	}
+	//	//fmt.Sprintf("lodaing data and datasource...\n")
+	//
+	//	if err != nil {
+	//		fmt.Sprintf("Unable to parse response and get status of datasource\n")
+	//		return
+	//	}
+	//	time.Sleep(3 * time.Second)
+	//}
+	//endTime := time.Now()
+	//duration := endTime.Sub(startTime)
+	//fmt.Printf("Data Insertion succeeded in %v seconds", duration)
 }
 
 func SubmitRequest(d *druid.Client, method, path string, opts interface{}) *druid.Response {

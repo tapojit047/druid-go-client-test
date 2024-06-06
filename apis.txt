@@ -11,3 +11,7 @@ curl "http://admin:5bFnC.M2PX*UER(7@localhost:8888/druid/coordinator/v1/config" 
 }'
 
 curl "http://admin:5bFnC.M2PX*UER(7@localhost:8888/status/selfDiscovered/status"
+curl "admin:sUv0~wYgQypRoPAN@druid-sample-routers-0.druid-sample-pods.druid.svc.cluster.local:8888/status/health"
+curl -u "admin:guKI\!vy1OyfHQ_;D" druid-sample-routers-0.druid-sample-pods.druid.svc.cluster.local:8888/status/properties
+
+curl "admin:sUv0~wYgQypRoPAN@localhost:8888/druid/coordinator/v1/config"
