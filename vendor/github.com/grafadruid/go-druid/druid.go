@@ -168,8 +168,11 @@ func (c *Client) Do(r *retryablehttp.Request, result interface{}) (*Response, er
 	if err = response.ExtractError(); err != nil {
 		return nil, err
 	}
+	fmt.Println("2222222222222222222222222222222")
 	if result != nil {
+		fmt.Println("3333333333333333333333333333333")
 		if err = json.NewDecoder(resp.Body).Decode(result); err != nil {
+			fmt.Println("4444444444444444444444444")
 			return nil, err
 		}
 	}
